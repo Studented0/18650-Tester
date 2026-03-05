@@ -43,7 +43,8 @@ cell hits the cutoff voltage.
 3. `R_int (mΩ) = (V_oc - V_load) / I * 1000`
 
 ## Wiring Diagram
-*(add after KiCad schematic is complete)*
+
+[CellScan_Schematic.pdf](https://github.com/user-attachments/files/25781517/CellScan_Schematic.pdf)
 
 ## 3D Model
 *(add after SolidWorks model is complete)*
@@ -51,7 +52,7 @@ cell hits the cutoff voltage.
 ## Bill of Materials
 
 | Component | Qty | Unit Price | Link |
-| ESP32 38-pin Dev Board | 1 | $8.99 | $8.99 | [Amazon](https://www.amazon.com/AITRIP-ESP-WROOM-32-Development-Microcontroller-Compatible/dp/B0DF2YJSHN/) |
+| ESP32 38-pin Dev Board | 1 | $8.99 | $8.99 | [Amazon](  ) |
 | INA219 Current Sensor (4-pack) | 1 | $10.99 | [Amazon](https://www.amazon.com/Bi-Directional-Breakout-Interface-Ar-duino-Raspberry/dp/B091DRHL79) |
 | TCA9548A I2C Multiplexer | 1 | $5.99 | [Amazon](https://www.amazon.com/NOYITO-TCA9548A-Multiplexer-Breakout-Expansion/dp/B07DS6F3V2) |
 | IRLZ44N MOSFET (5-pack) | 1 | $9.99 | [Amazon](https://www.amazon.com/Technologies-Threshold-Protective-Packaging-IRLZ44NPBF/dp/B0FMQCYG6Q/) |
@@ -59,10 +60,8 @@ cell hits the cutoff voltage.
 | 0.96" OLED Display I2C SSD1306 | 1 | $6.99 |  [Amazon](https://www.amazon.com/UCTRONICS-SSD1306-Self-Luminous-Display-Raspberry/dp/B072Q2X2LL/) |
 | Single 18650 Cell Holders (4-pack) | 1 | $6.69 | [Amazon](https://www.amazon.com/Battery-Storage-Holder-Button-Single/dp/B07KD9JLH3/) |
 | Breadboard + Jumper Wires | 1 | $15.99 |  [Amazon](https://www.amazon.com/ELEGOO-Electronics-Potentiometer-tie-Points-Breadboard/dp/B09YRJQRFF/) |
-| **Total** | | | **~$61.93** | |
+| **Total** | | | **~$72.62** | |
 
-*Note: I already own 18650 cells from my science fair project. 
-Actual grant request is ~$62.*
 
 ## Firmware
 - `firmware/main.cpp` — main loop, state machine per channel
