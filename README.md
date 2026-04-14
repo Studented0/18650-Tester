@@ -40,7 +40,8 @@ the cell hits the cutoff voltage.
 
 ## Wiring Diagram
 
-[CellScan_Schematic.pdf]([CellScan_Schematic .pdf](https://github.com/user-attachments/files/26695533/CellScan_Schematic.2.pdf))
+[CellScan_Schematic.pdf]([CellScan_Schematic .pdf](https://github.com/user-attachments/files/26695533/CellScan_Schematic.2.pdf)) <img width="1123" height="794" alt="image" src="https://github.com/user-attachments/assets/6529a4e5-4a6b-4101-ba9c-cefef7517bf4" />
+
 
 ## Bill of Materials
 
