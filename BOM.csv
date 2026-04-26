@@ -1,0 +1,19 @@
+Comment,Designator,Footprint,Quantity,LCSC Part,Note
+100nF,BAT1.3 BAT1.4 BAT2.3 BAT2.4 BAT3.3 BAT3.4 BAT4.3 BAT4.4 ENCC1 ENCC2 ENCC3,C_0402_1005Metric,11,C1525,Basic
+10k,BAT1.1 BAT2.1 BAT3.1 BAT4.1 ENCR1 ENCR2 ENCR3,R_0402_1005Metric,7,C25744,Basic
+5.1k,R5 R6,R_0402_1005Metric,2,C25905,Basic — CC1/CC2 USB-C pull-downs
+1.2k,BAT1.2 BAT2.2 BAT3.2 BAT4.2,R_0402_1005Metric,4,C25862,Extended — TP4056 PROG resistors
+1k,BAT1RED1 BAT1GREEN1 BAT2RED1 BAT2GREEN1 BAT3RED1 BAT3GREEN1 BAT4RED1 BAT4GREEN1,R_0402_1005Metric,8,C11702,Basic — LED series resistors
+RED LED 0402,RED1 RED2 RED3 RED4 GREEN1 GREEN2 GREEN3 GREEN4,LED_0402_1005Metric,8,C71911,Extended — all indicators use same red LED
+INA219AIDR,U3 U4 U5 U6,SOIC-8_3.9x4.9mm_P1.27mm,4,C138706,Extended
+TCA9548AMRGER,U2,Texas_RGE0024C_VQFN-24-1EP_4x4mm_P0.5mm_EP2.1x2.1mm,1,C2876717,Extended
+TP4056-42-ESOP8,U7 U8 U9 U10,SOIC-8-1EP_3.9x4.9mm_P1.27mm_EP2.41x3.3mm_ThermalVias,4,C16581,Extended
+GCT USB4125 USB-C,J3,USB_C_Receptacle_GCT_USB4125,1,C2682777,Extended — dedicated 5V power input
+
+-- THROUGH-HOLE (manual solder) --
+IRLZ44N MOSFET,Q1 Q2 Q3 Q4,TO-220-3_Vertical,4,,Amazon — solder by hand
+1ohm 10W resistor,R1 R2 R3 R4,R_Axial_Power_L48.0mm_W12.5mm_P55.88mm,4,,Amazon — solder by hand
+18650 cell holder,BT1 BT2 BT3 BT4,BatteryHolder_Keystone_1042_1x18650,4,,Amazon — solder by hand
+OLED 4-pin header,J1,PinHeader_1x04_P2.54mm_Vertical,1,,Amazon — solder by hand
+ESP32-WROOM-32 dev board,U1,ESP32-DevKitC-30PIN,1,,Amazon — socket or solder by hand
+EC11 rotary encoder,SW1,RotaryEncoder_Alps_EC11E-Switch_Vertical_H20mm,1,,JLCPCB PCB — solder by hand
