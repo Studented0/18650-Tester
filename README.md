@@ -1,70 +1,129 @@
 # CellScan — 4-Channel 18650 Battery Analyzer
 
-## What It Does
-CellScan tests up to 4 18650 lithium-ion cells simultaneously.
-Each channel measures voltage, capacity (mAh), and internal resistance.
-Results display on an OLED screen and a live WiFi dashboard hosted
-by an ESP32, where you can start and stop tests per channel.
+CellScan tests up to 4 18650 lithium-ion cells at once. Each channel measures voltage, capacity in mAh, and internal resistance. Everything shows up on a small OLED screen with a rotary encoder to navigate, and there's a WiFi dashboard where you can start and stop tests per channel.
 
-## Why I Built This
-My science fair project was a 3S34P battery pack built from 34 salvaged
-18650 cells. I bought a tester from Amazon but I wanted to understand how
-it actually works and build one myself with 4 parallel channels so I could
-test one series row at a time.
+I built this because my science fair project was a 3S34P battery pack made from 34 salvaged 18650 cells. I bought a cheap tester off Amazon to sort them but I wanted to know how it actually worked. I also wanted an excuse to learn PCB design. CellScan is the result; a custom two-layer PCB with SMD assembly through JLCPCB, designed from scratch in KiCad.
 
-## System Architecture
-[Cell 1] ──► [INA219 #1] ──┐
-[Cell 2] ──► [INA219 #2] ──┤
-[Cell 3] ──► [INA219 #3] ──┼──► [TCA9548A Mux] ──► [ESP32]
-[Cell 4] ──► [INA219 #4] ──┘                          │
-├──► [OLED Display]
-└──► [WiFi Dashboard]
-Each channel:
-[Cell] ──► [INA219] ──► [MOSFET] ──► [2Ω 10W Resistor] ──► [GND]
-▲
-[ESP32 GPIO]
+---
 
-## How Each Measurement Works
+## How It Works
 
-**Voltage** — INA219 reads cell terminal voltage continuously every 500ms
+Each channel has an INA219 current sensor, an IRLZ44N MOSFET as a discharge switch, and a 1Ω 10W cement resistor as the load. All four INA219s share an I2C bus through a TCA9548A multiplexer since they'd otherwise have the same address. The ESP32 polls each channel every 500ms and runs a state machine per channel.
 
-**Capacity (mAh)** — ESP32 switches MOSFET on to start discharge through
-load resistor. INA219 measures current. Capacity accumulates using coulomb
-counting: `mAh += current_A * (elapsed_ms / 3600000.0)` every 500ms until
-the cell hits the cutoff voltage.
+**Voltage** — INA219 reads bus voltage continuously.
 
-**Internal Resistance** — Measured at test start using the voltage sag:
-1. MOSFET off → read open circuit voltage (V_oc)
-2. MOSFET on → wait 100ms → read loaded voltage (V_load) and current (I)
-3. `R_int (mΩ) = (V_oc - V_load) / I * 1000`
+**Capacity** — The ESP32 switches the MOSFET on to start discharge. Capacity accumulates by coulomb counting: `mAh += current_mA * (elapsed_ms / 3600000.0)` every poll until the cell hits the cutoff voltage.
 
-## Wiring Diagram
+**Internal resistance (DCIR)** — Measured at test start using voltage sag. MOSFET off, read open-circuit voltage. MOSFET on, wait 100ms, read loaded voltage and current. `ESR (mΩ) = (V_oc - V_load) / I_load * 1000`.
 
-[CellScan_Schematic.pdf]([CellScan_Schematic .pdf](https://github.com/user-attachments/files/26695533/CellScan_Schematic.2.pdf)) <img width="1123" height="794" alt="image" src="https://github.com/user-attachments/assets/6529a4e5-4a6b-4101-ba9c-cefef7517bf4" />
+Each channel also has a TP4056 lithium charger so CellScan can charge and discharge. The TP4056 CE pin is under firmware control — the ESP32 pulls it low to disable the charger before starting a discharge test, then releases it when the test ends so charging resumes automatically.
 
+The OLED and rotary encoder work standalone without WiFi. Rotate to switch between channels, press to open a menu, long press to go back. From the menu you can start a test, stop it, or adjust the cutoff voltage per channel.
+
+---
+
+## Architecture
+
+```
+[Cell 1] ──► [INA219] ──┐
+[Cell 2] ──► [INA219] ──┤
+[Cell 3] ──► [INA219] ──┼──► [TCA9548A] ──► [ESP32] ──► [OLED + encoder]
+[Cell 4] ──► [INA219] ──┘                       │
+                                            [WiFi dashboard]
+
+Per channel:
+[Cell+] ──► [INA219 IN+/IN-] ──► [MOSFET drain] ──► [1Ω resistor] ──► [GND]
+                                        ▲
+                                  [ESP32 GPIO]
+```
+
+---
+
+## GPIO Map
+
+| Signal | GPIO |
+|--------|------|
+| SDA | 21 |
+| SCL | 22 |
+| GATE_CH1 | 25 |
+| GATE_CH2 | 26 |
+| GATE_CH3 | 27 |
+| GATE_CH4 | 32 |
+| CE_CH1 | 13 |
+| CE_CH2 | 12 |
+| CE_CH3 | 14 |
+| CE_CH4 | 33 |
+| ENC_A | 15 |
+| ENC_B | 2 |
+| ENC_SW | 5 |
+
+---
+
+## PCB
+
+Two-layer board, 100×150mm, designed in KiCad 9. SMD components assembled by JLCPCB. Through-hole parts (MOSFETs, discharge resistors, cell holders, OLED header, ESP32, rotary encoder) soldered by hand after the board arrives.
+
+The schematic PDF is in `hardware/`. KiCad source files and gerbers are in `hardware/` as well.
+
+---
+
+## Assembly
+
+The PCB comes back from JLCPCB with all SMD parts already placed — resistors, caps, LEDs, INA219s, TCA9548A, TP4056s, and the USB-C connector. What's left to solder by hand is the through-hole stuff: four MOSFETs, four cement resistors, four cell holders, the OLED header, the ESP32 dev board, and the rotary encoder. The cement resistors run hot under load so they sit raised slightly off the board surface.
+
+---
+
+## Firmware
+
+`firmware/CellScan.ino` — state machine per channel, coulomb counting, DCIR measurement, TP4056 CE control, rotary encoder UI, OLED display, WiFi dashboard.
+
+Libraries needed: Adafruit INA219, Adafruit SSD1306, Adafruit GFX, ArduinoJson. Install through Arduino IDE library manager. Board: ESP32 Dev Module.
+
+---
 
 ## Bill of Materials
 
-| Component | Qty | Unit Price | Link |
-|-----------|-----|------------|------|
-| ESP32 38-pin Dev Board | 1 | $8.99 | [Amazon](https://www.amazon.com/dp/B08D5ZD528) |
-| INA219 Current Sensor (4-pack) | 1 | $10.99 | [Amazon](https://www.amazon.com/Bi-Directional-Breakout-Interface-Ar-duino-Raspberry/dp/B091DRHL79) |
-| TCA9548A I2C Multiplexer | 1 | $5.99 | [Amazon](https://www.amazon.com/NOYITO-TCA9548A-Multiplexer-Breakout-Expansion/dp/B07DS6F3V2) |
-| IRLZ44N MOSFET (5-pack) | 1 | $9.99 | [Amazon](https://www.amazon.com/Technologies-Threshold-Protective-Packaging-IRLZ44NPBF/dp/B0FMQCYG6Q/) |
-| 2Ω 10W Power Resistor (10-pack) | 1 | $6.99 | [Amazon](https://www.amazon.com/Resistors-Wirewound-Resistance-Precharge-Horizontal/dp/B09V5MTX8Q/) |
-| 0.96" OLED Display I2C SSD1306 | 1 | $6.99 | [Amazon](https://www.amazon.com/UCTRONICS-SSD1306-Self-Luminous-Display-Raspberry/dp/B072Q2X2LL/) |
-| Single 18650 Cell Holders (4-pack) | 1 | $6.69 | [Amazon](https://www.amazon.com/Battery-Storage-Holder-Button-Single/dp/B07KD9JLH3/) |
-| Breadboard + Jumper Wires | 1 | $15.99 | [Amazon](https://www.amazon.com/ELEGOO-Electronics-Potentiometer-tie-Points-Breadboard/dp/B09YRJQRFF/) |
-| **Total** | | **~$72.62** | |
+SMD parts are ordered through JLCPCB assembly. Through-hole parts sourced separately.
 
-## Firmware
-- `firmware/CellScan.ino` — full state machine per channel, coulomb counting, DCIR measurement, OLED display, WiFi dashboard
+| Component | Qty | LCSC | Note |
+|-----------|-----|------|------|
+| 100nF 0402 cap | 11 | C1525 | Basic |
+| 10kΩ 0402 resistor | 7 | C25744 | Basic |
+| 5.1kΩ 0402 resistor | 2 | C25905 | Basic — USB-C CC pull-downs |
+| 1.2kΩ 0402 resistor | 4 | C25862 | Extended — TP4056 PROG |
+| 1kΩ 0402 resistor | 8 | C11702 | Basic — LED series |
+| Red LED 0402 | 8 | C71911 | Extended — all status indicators |
+| INA219AIDR | 4 | C138706 | Extended |
+| TCA9548AMRGER | 1 | C2876717 | Extended |
+| TP4056 SOP-8 | 4 | C16581 | Extended |
+| GCT USB4125 USB-C | 1 | C2682777 | Extended — verify before ordering |
+
+| Component | Qty | Link |
+|-----------|-----|------|
+| ESP32 WROOM-32 dev board | 1 | [Amazon](https://www.amazon.com/dp/B08D5ZD528) |
+| IRLZ44N MOSFET | 4 | [Amazon](https://www.amazon.com/Technologies-Threshold-Protective-Packaging-IRLZ44NPBF/dp/B0FMQCYG6Q/) |
+| 1Ω 10W cement resistor | 4 | [Amazon](https://www.amazon.com/Resistors-Wirewound-Resistance-Precharge-Horizontal/dp/B09V5MTX8Q/) |
+| 18650 cell holders | 4 | [Amazon](https://www.amazon.com/Battery-Storage-Holder-Button-Single/dp/B07KD9JLH3/) |
+| SSD1306 OLED 0.96" | 1 | [Amazon](https://www.amazon.com/UCTRONICS-SSD1306-Self-Luminous-Display-Raspberry/dp/B072Q2X2LL/) |
+| EC11 rotary encoder | 1 | (already owned) |
+(everything is already purchased and owned)
+---
 
 ## Repository Structure
-CellScan/
+
+```
+18650-Tester/
 ├── BOM.csv
 ├── README.md
 ├── firmware/
 │   └── CellScan.ino
 └── hardware/
-└── CellScan_Schematic.kicad_sch
+    ├── CellScan_Schematic.kicad_sch
+    ├── CellScan_Schematic.kicad_pcb
+    ├── CellScan_Schematic.kicad_pro
+    ├── CellScan_Schematic.pdf
+    ├── libraries/
+    │   └── ESP32-DevKitC-30PIN.kicad_mod
+    └── gerbers/
+        └── (gerber and drill files, BOM, CPL)
+```
