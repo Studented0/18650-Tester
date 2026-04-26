@@ -2,7 +2,7 @@
  * CellScan — 4-Channel 18650 Battery Analyzer
  * ESP32 + TCA9548A + 4x INA219 + IRLZ44N + 4x TP4056 + EC11 + SSD1306
  *
- * Pin map (verified against CellScan_Schematic.kicad_sch):
+ * Pin map:
  *   SDA       = GPIO21   SCL       = GPIO22
  *   GATE_CH1  = GPIO25   GATE_CH2  = GPIO26
  *   GATE_CH3  = GPIO27   GATE_CH4  = GPIO32
@@ -13,14 +13,8 @@
  * HARDWARE NOTE — GPIO12 (CE_CH2):
  *   GPIO12 is a strapping pin. High at boot selects 1.8V flash mode,
  *   which causes boot failures on standard 3.3V flash modules.
- *   CE_CH2 has a 10k pull-up to +5V, so GPIO12 sees ~5V through 10k at boot.
- *   If the board won't boot, change the CE_CH2 pull-up resistor from +5V to +3V3.
+ *   Burn EFLASH if needed
  *
- * ENCODER NOTES:
- *   ENC_B = GPIO2. Pull-up to +3V3 = HIGH at boot = fine (normal boot).
- *   GPIO2 may drive the onboard LED on some dev boards — expect flicker.
- *   ENC_A = GPIO15. Pull-up to +3V3 = HIGH at boot = extra bootloader
- *   UART output, but doesn't break boot.
  *
  * ENCODER UI:
  *   Rotate       = navigate channels / menu items / adjust values
@@ -364,10 +358,3 @@ void setup() {
 }
 
 uint32_t last_draw = 0;
-
-void loop() {
-  srv.handleClient();
-  handle_ui();
-  for (int i = 0; i < NUM_CH; i++) update_ch(i);
-  if (millis() - last_draw >= 100) { redraw(); last_draw = millis(); }
-}
