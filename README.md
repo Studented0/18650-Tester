@@ -1,3 +1,4 @@
+
 # CellScan — 4-Channel 18650 Battery Analyzer
 
 CellScan tests up to 4 18650 lithium-ion cells at once. Each channel measures voltage, capacity in mAh, and internal resistance. Everything shows up on a small OLED screen with a rotary encoder to navigate, and there's a WiFi dashboard where you can start and stop tests per channel.
@@ -64,12 +65,15 @@ Per channel:
 Two-layer board, 100×150mm, designed in KiCad 9. SMD components assembled by JLCPCB. Through-hole parts (MOSFETs, discharge resistors, cell holders, OLED header, ESP32, rotary encoder) soldered by hand after the board arrives.
 
 The schematic PDF is in `hardware/`. KiCad source files and gerbers are in `hardware/` as well.
+<img width="2983" height="4096" alt="capture-2026-04-26T04_29_05 719Z" src="https://github.com/user-attachments/assets/468e721d-cd10-43aa-bbcf-cbd18dc805ad" />
 
 ---
 
 ## Assembly
 
 The PCB comes back from JLCPCB with all SMD parts already placed — resistors, caps, LEDs, INA219s, TCA9548A, TP4056s, and the USB-C connector. What's left to solder by hand is the through-hole stuff: four MOSFETs, four cement resistors, four cell holders, the OLED header, the ESP32 dev board, and the rotary encoder. The cement resistors run hot under load so they sit raised slightly off the board surface.
+<img width="1728" height="967" alt="Screenshot 2026-04-25 225231" src="https://github.com/user-attachments/assets/225b0c0e-0082-48da-9bba-389f472be4ed" />
+<img width="1724" height="978" alt="image" src="https://github.com/user-attachments/assets/25741943-ebc5-4494-92fd-266fa26940e5" />
 
 ---
 
